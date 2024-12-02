@@ -1,0 +1,83 @@
+#include <iostream>
+#include <queue>
+#include <set>
+using namespace std;
+
+// A structure to store the state of jugs
+struct State {
+    int jug1; // Current amount in Jug1
+    int jug2; // Current amount in Jug2
+};
+
+void solveWaterJug(int capacity1, int capacity2, int target) {
+    // Set to store visited states
+    set<pair<int, int>> visited;
+    
+    // Queue to perform BFS
+    queue<pair<State, string>> q;
+
+    // Initial state: both jugs are empty
+    State initialState = {0, 0};
+    q.push({initialState, ""});
+    
+    while (!q.empty()) {
+        auto current = q.front();
+        q.pop();
+
+        int currentJug1 = current.first.jug1;
+        int currentJug2 = current.first.jug2;
+        string path = current.second;
+
+        // If the target amount is achieved in any jug
+        if (currentJug1 == target || currentJug2 == target) {
+            cout << "Solution Found: " << endl;
+            cout << path << endl;
+            return;
+        }
+
+        // If the state is already visited, skip it
+        if (visited.find({currentJug1, currentJug2}) != visited.end())
+            continue;
+
+        // Mark this state as visited
+        visited.insert({currentJug1, currentJug2});
+
+        // Perform all possible operations and push to queue
+
+        // Fill Jug1
+        q.push({{capacity1, currentJug2}, path + "Fill Jug1\n"});
+
+        // Fill Jug2
+        q.push({{currentJug1, capacity2}, path + "Fill Jug2\n"});
+
+        // Empty Jug1
+        q.push({{0, currentJug2}, path + "Empty Jug1\n"});
+
+        // Empty Jug2
+        q.push({{currentJug1, 0}, path + "Empty Jug2\n"});
+
+        // Pour Jug1 -> Jug2
+        int pourToJug2 = min(currentJug1, capacity2 - currentJug2);
+        q.push({{currentJug1 - pourToJug2, currentJug2 + pourToJug2}, path + "Pour Jug1 -> Jug2\n"});
+
+        // Pour Jug2 -> Jug1
+        int pourToJug1 = min(currentJug2, capacity1 - currentJug1);
+        q.push({{currentJug1 + pourToJug1, currentJug2 - pourToJug1}, path + "Pour Jug2 -> Jug1\n"});
+    }
+
+    cout << "No solution found." << endl;
+}
+
+int main() {
+    int jug1Capacity, jug2Capacity, target;
+    cout << "Enter capacity of Jug1: ";
+    cin >> jug1Capacity;
+    cout << "Enter capacity of Jug2: ";
+    cin >> jug2Capacity;
+    cout << "Enter target amount of water: ";
+    cin >> target;
+
+    solveWaterJug(jug1Capacity, jug2Capacity, target);
+
+    return 0;
+}
